@@ -1,57 +1,50 @@
-def create_hash(array)
-  hash = {}
-  array.each do |item|
-    goods, count = item.split('-')
+
+def aggregate_goods(items)
+  inventory = {}
+  items.each do |item|
+    name, count = item.split('-')
+    name.strip!
     count = count.to_i
-    if hash[goods]
-      hash[goods] += count
+    if inventory.key?(name.to_sym)
+      inventory[name.to_sym] += count
     else
-      hash[goods] = count
+      inventory[name.to_sym] = count
     end
   end
-  hash
+  inventory
 end
 
-array = ['Milk-10', 'Milk-20', 'Sugar-10', "Sugar-25"]
-puts create_hash(array)
+def classify_students(data, max_score, upper_bound, lower_bound)
+  students = data.split('\ ').map do |s|
+    name, score = s.split(',')
+    [name.strip, score.to_i]
+  end.sort_by { |name, score| [-score, name] }
 
+  threshold_top = max_score - (max_score * upper_bound / 100.0)
+  threshold_bottom = max_score - (max_score * lower_bound / 100.0)
 
-
-def student_performance(csv, max, upper_bound, lower_bound)
-  students = csv.split("\\").map do |student|
-    name, score = student.split(',')
-    [name, score.to_i]
-  end
-
-  students.sort_by! { |name, score| [-score, name] }
-
-  top_score = max - upper_bound
-  min_score = max - lower_bound
-
-  top_students = []
-  middle_students = []
-  bottom_students = []
+  result = { top: [], middle: [], bottom: [] }
 
   students.each do |name, score|
-    if score >= top_score
-      top_students << name
-    elsif score >= min_score
-      middle_students << name
+    if score >= threshold_top
+      result[:top] << name
+    elsif score >= threshold_bottom
+      result[:middle] << name
     else
-      bottom_students << name
+      result[:bottom] << name
     end
   end
 
-  puts "Top: #{top_students}"
-  puts "Middle: #{middle_students}"
-  puts "Bottom: #{bottom_students}"
+  result
 end
 
-csv = "Student1,70\\ Student3,80\\ Student2,80"
-max = 100
+
+items = ['Milk - 10', 'Milk - 20', 'Sugar - 10']
+puts aggregate_goods(items).inspect
+puts ""
+data = "Student1,70\\ Student3,86\\ Student2,95"
+max_score = 100
 upper_bound = 10
 lower_bound = 15
 
-student_performance(csv, max, upper_bound, lower_bound)
-
-
+puts classify_students(data, max_score, upper_bound, lower_bound).inspect
